@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myrepo-backend
+  labels:
+    app: myrepo-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myrepo-backend
+  template:
+    metadata:
+      labels:
+        app: myrepo-backend
+    spec:
+      containers:
+      - name: backend
+        image: krng19/myrepo-backend:1.0
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: production
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /api/message
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myrepo-backend-service
+  labels:
+    app: myrepo-backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: myrepo-backend

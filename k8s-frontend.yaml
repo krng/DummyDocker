@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myrepo-frontend
+  labels:
+    app: myrepo-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myrepo-frontend
+  template:
+    metadata:
+      labels:
+        app: myrepo-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: krng19/myrepo-frontend:1.0
+        ports:
+        - containerPort: 4200
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 4200
+          initialDelaySeconds: 10
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myrepo-frontend-service
+  labels:
+    app: myrepo-frontend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 4200
+    targetPort: 4200
+    protocol: TCP
+  selector:
+    app: myrepo-frontend
